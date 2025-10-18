@@ -1,9 +1,4 @@
-CREATE TABLE IF NOT EXISTS "owner" (
-    owner_id SERIAL PRIMARY KEY,
-    owner_name VARCHAR(100) NOT NULL,
-    address VARCHAR(255),
-    phone_number VARCHAR(20),
-    email VARCHAR(100)
+
 );
 
 CREATE TABLE IF NOT EXISTS "user" (
@@ -62,5 +57,6 @@ CREATE TABLE IF NOT EXISTS rating (
     rate_value INTEGER CHECK (rate_value >= 1 AND rate_value <= 5),
     comment TEXT
 );
+
 
 
