@@ -22,7 +22,7 @@ CREATE TABLE user_emergency_contacts (
     contact_id serial primary key,
     user_id int not null references users(user_id) on delete cascade,
     contact_name varchar(100) not null,
-    relationship varchar(50) not null check (relationship in ('father', 'mother', 'brother', 'sister', 'spouse', 'guardian', 'other')),
+    relationship varchar(50) not null check (relationship in ('father', 'mother', 'brother', 'sister', 'friend', 'spouse', 'guardian', 'other')),
     phone_number varchar(20) not null,
     is_primary boolean default false,
     created_at timestamp default current_timestamp
@@ -86,4 +86,5 @@ CREATE TABLE rating (
     comment text not null,
     created_at timestamp default current_timestamp
 );
+
 
