@@ -6,4 +6,5 @@ INSERT INTO payment_methods (name, type) VALUES
 ('OVO', 'ewallet'),
 ('DANA', 'ewallet'),
 ('QRIS', 'qris'),
-('Tunai', 'Cash');
+('Tunai', 'cash');
+
