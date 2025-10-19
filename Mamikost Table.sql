@@ -51,11 +51,11 @@ CREATE TABLE room (
 );
 
 CREATE TABLE payment_methods (
-    payment_method_id serial primary key,
-    method_name varchar(50) not null,
-    description text,
-    is_active boolean default true,
-    created_at timestamp default current_timestamp
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    type VARCHAR(20) NOT NULL,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE orders (
@@ -86,5 +86,6 @@ CREATE TABLE rating (
     comment text not null,
     created_at timestamp default current_timestamp
 );
+
 
 
