@@ -1,5 +1,4 @@
 INSERT INTO room (room_id, room_number, type, price, kost_id, is_available, created_at) VALUES
-ALTER TABLE room DROP CONSTRAINT room_kost_id_room_number_key;
 (1, 'R868', 'vip', 3210058.46, 2071, false, '2023-01-09 01:27:00'),
 (2, 'R879', 'vip', 573925.15, 5173, false, '2023-01-12 14:17:00'),
 (3, 'R331', 'premium', 4495088.75, 6037, true, '2025-10-01 22:54:00'),
