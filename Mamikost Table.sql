@@ -61,7 +61,7 @@ CREATE TABLE payment_methods (
 CREATE TABLE orders (
     order_id serial primary key,
     period int not null check (period > 0),
-    payment_method_id int not null references payment_methods(payment_method_id),
+    payment_method_id int not null references payment_methods(id),
     order_date date not null default current_date,
     room_id int not null references room(room_id),
     user_id int not null references users(user_id),
@@ -86,6 +86,7 @@ CREATE TABLE rating (
     comment text not null,
     created_at timestamp default current_timestamp
 );
+
 
 
 
