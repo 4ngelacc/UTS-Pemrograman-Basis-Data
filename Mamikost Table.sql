@@ -46,8 +46,7 @@ CREATE TABLE room (
     price decimal(12,2) not null,
     kost_id int not null references kost(kost_id) on delete cascade,
     is_available boolean default true,
-    created_at timestamp default current_timestamp,
-    unique(kost_id, room_number)
+    created_at timestamp default current_timestamp
 );
 
 CREATE TABLE payment_methods (
@@ -86,6 +85,7 @@ CREATE TABLE rating (
     comment text not null,
     created_at timestamp default current_timestamp
 );
+
 
 
 
