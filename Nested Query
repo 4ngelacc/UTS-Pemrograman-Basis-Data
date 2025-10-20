@@ -1,0 +1,167 @@
+-- NESTED QUERY 
+-- 1. Mengetahui kapasitas kamar kosong per kos (untuk manajemen ketersediaan).
+SELECT 
+    k.kost_name,
+    (
+        SELECT COUNT(*) 
+        FROM room r 
+        WHERE r.kost_id = k.kost_id AND r.is_available = TRUE
+    ) AS available_rooms
+FROM kost k;
+
+
+-- 2, Menganalisis sebaran gender dan umur pengguna (demografi penghuni).
+SELECT 
+    gender,
+    COUNT(*) AS total_users,
+    (
+        SELECT COUNT(*) FROM users u2 WHERE u2.gender = users.gender AND u2.birth_date < '2000-01-01'
+    ) AS total_users_before_2000
+FROM users
+GROUP BY gender;
+
+-- 3, Identifikasi akun pengguna pasif yang belum pernah menyewa.
+SELECT 
+    u.username
+FROM users u
+WHERE u.user_id NOT IN (
+    SELECT DISTINCT user_id FROM orders
+);
+
+-- 4. Rata-rata harga kamar per tipe kost (male, female, mixed)
+SELECT 
+    k.type_of_kost,
+    ROUND(AVG(r.price), 2) AS avg_room_price
+FROM kost k
+JOIN room r ON r.kost_id = k.kost_id
+GROUP BY k.type_of_kost;
+
+-- 5. Metode pembayaran paling populer yang digunakan berdasarkan transaksi yang completed atau confirmed
+SELECT pm.name,
+COUNT(CASE WHEN o.status IN ('confirmed', 'completed') THEN 1 END) AS total_penggunaan_sukses
+FROM payment_methods pm
+LEFT JOIN orders o ON pm.id = o.payment_method_id   
+GROUP BY pm.name
+ORDER BY total_penggunaan_sukses DESC;
+
+-- 6. Untuk menampilkan tanggal selesai sewa untuk semua pesanan completed/confirmed
+SELECT
+    o.order_id,
+    u.username,
+    r.room_number,
+    o.order_date AS mulai_sewa,
+    o.period AS periode_bulan,
+    (o.order_date + (o.period || ' month')::interval)::date AS selesai_sewa, o.status
+FROM orders o
+JOIN users u ON o.user_id = u.user_id
+JOIN room r ON o.room_id = r.room_id
+WHERE o.status IN ('confirmed', 'completed')
+ORDER BY selesai_sewa ASC;
+
+-- 7. Menampilkan kost yang memiliki rating paling buruk (rating 1)
+SELECT k.kost_name,
+COUNT(r.rating_id) AS total_rating_1
+FROM rating r
+JOIN kost k ON r.kost_id = k.kost_id
+WHERE r.rate_value = 1 
+GROUP BY k.kost_name
+ORDER BY total_rating_1 DESC;
+
+
+-- 8. Menampilkan periode sewa yang paling diminati penghuni
+SELECT o.period AS periode_sewa_bulan,
+COUNT(o.order_id) AS total_pesanan
+FROM orders o
+GROUP BY o.period
+ORDER BY total_pesanan DESC 
+LIMIT 1;
+
+
+-- 9. Mengetahui kost besar (kapasitas di atas rata-rata).
+SELECT kost_name, total_room
+FROM kost
+WHERE total_room > (
+    SELECT AVG(total_room) FROM kost
+);
+
+
+10. kost milik pemilik paling aktif
+SELECT k.kost_name
+FROM kost k
+WHERE k.owner_id = (
+    SELECT owner_id
+    FROM kost
+    GROUP BY owner_id
+    ORDER BY COUNT(*) DESC
+    LIMIT 1
+);
+
+
+-- 11. Menampilkan kost dengan jumlah lantai terbanyak
+SELECT kost_name, number_of_floor
+FROM kost
+WHERE number_of_floor = (
+    SELECT MAX(number_of_floor)
+    FROM kost
+);
+
+
+-- 12. kost dengan jumlah kamar paling sedikit untuk tipe “female”
+SELECT kost_name, total_room
+FROM kost
+WHERE total_room = (
+    SELECT MIN(total_room)
+    FROM kost
+    WHERE type_of_kost = 'female'
+)
+AND type_of_kost = 'female';
+
+
+-- 13. Menampilkan kamar yang belum pernah disewa sama sekali
+SELECT
+    r.room_number,
+    k.kost_name
+FROM room r
+JOIN kost k ON r.kost_id = k.kost_id
+WHERE r.room_id NOT IN (
+    SELECT DISTINCT o.room_id FROM orders o
+);
+
+
+-- 14. Melihat pertumbuhan user untuk strategi marketing atau retensi pengguna perbulan
+WITH user_per_bulan AS (
+    SELECT 
+        TO_CHAR(created_at, 'YYYY-MM') AS bulan_registrasi,
+        COUNT(*) AS total_pengguna_baru
+    FROM users
+    GROUP BY TO_CHAR(created_at, 'YYYY-MM')
+)
+SELECT 
+    upb.bulan_registrasi,
+    upb.total_pengguna_baru,
+    (
+        SELECT COUNT(DISTINCT u2.user_id)
+        FROM users u2
+        WHERE TO_CHAR(u2.created_at, 'YYYY-MM') = upb.bulan_registrasi
+        AND EXISTS (
+            SELECT 1 FROM orders o WHERE o.user_id = u2.user_id
+        )
+    ) AS pengguna_aktif
+FROM user_per_bulan upb
+ORDER BY upb.bulan_registrasi;
+
+
+-- 15. Menampilkan 10 kamar terpopuler berdasarkan jumlah transaksi sukses.
+SELECT
+    r.room_number,
+    k.kost_name,
+    (
+        SELECT COUNT(*) 
+        FROM orders o 
+        WHERE o.room_id = r.room_id 
+        AND o.status IN ('confirmed', 'completed')
+    ) AS jumlah_disewa
+FROM room r
+JOIN kost k ON k.kost_id = r.kost_id
+ORDER BY jumlah_disewa DESC
+LIMIT 10;
